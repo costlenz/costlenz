@@ -1,0 +1,18 @@
+[tool.poetry]
+name = "costlenz-example"
+version = "1.0.0"
+description = "Example stack with OpenTelemetry instrumentation for Lambda and Botocore and capturing usage data by CostLenz."
+authors = ["Alexander Furman <alexander.furman@atlasgurus.com>"]
+
+[tool.poetry.dependencies]
+python = "^3.8"
+
+[tool.poetry.dev-dependencies]
+boto3 = "^1.20.23"
+opentelemetry-api = "^1.7.1"
+black = "^22.3.0"
+aws-cdk-lib = "^2.22.0"
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"

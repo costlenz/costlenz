@@ -1,0 +1,1737 @@
+Metadata:
+  AWS::CloudFormation::Interface:
+    ParameterGroups:
+      - Label:
+          default: Network
+        Parameters:
+          - VPC
+          - Subnets
+      - Label:
+          default: Collector
+        Parameters:
+          - CollectorTaskSize
+          - CollectorTasksDesired
+          - CollectorTasksMax
+      - Label:
+          default: Loadbalancer
+        Parameters:
+          - LoadbalancerTaskSize
+      - Label:
+          default: OpenTelemetry Span Attributes
+        Parameters:
+          - DefaultApplicationId
+          - ApplicationIdAttr
+          - TenantIdAttr
+          - ResourceIdAttr
+      - Label:
+          default: Application Cost Profiler
+        Parameters:
+          - AcpReportFrequency
+          - AcpReportOutputFormat
+          - ReportsExpireDays
+          - AcpNotificationEmail
+    ParameterLabels:
+      VPC:
+        default: VPC
+      Subnets:
+        default: Subnet
+      CollectorTaskSize:
+        default: Collector task size
+      LoadbalancerTaskSize:
+        default: Loadbalancer task size
+      CollectorTasksDesired:
+        default: Desired tasks
+      CollectorTasksMax:
+        default: Maximum tasks
+      DefaultApplicationId:
+        default: Default Application ID
+      ApplicationIdAttr:
+        default: Application ID Attribute
+      TenantIdAttr:
+        default: Tenant ID Attribute
+      ResourceIdAttr:
+        default: Resource ID Attribute
+      AcpReportFrequency:
+        default: Report Generation Frequency
+      AcpReportOutputFormat:
+        default: Report Output Format
+      AcpNotificationEmail:
+        default: Email
+      ReportsExpireDays:
+        default: Reports expiration (days)
+Mappings:
+  tasksizemapping:
+    .25vCPU-0.5Gb:
+      CPU: 256
+      MEMORY: 512
+    .25vCPU-1Gb:
+      CPU: 256
+      MEMORY: 1024
+    .25vCPU-2Gb:
+      CPU: 256
+      MEMORY: 2048
+    .5vCPU-1Gb:
+      CPU: 512
+      MEMORY: 1024
+    .5vCPU-2Gb:
+      CPU: 512
+      MEMORY: 2048
+    .5vCPU-3Gb:
+      CPU: 512
+      MEMORY: 3072
+    .5vCPU-4Gb:
+      CPU: 512
+      MEMORY: 4096
+    1vCPU-2Gb:
+      CPU: 1024
+      MEMORY: 2048
+    1vCPU-3Gb:
+      CPU: 1024
+      MEMORY: 3072
+    1vCPU-4Gb:
+      CPU: 1024
+      MEMORY: 4096
+    1vCPU-5Gb:
+      CPU: 1024
+      MEMORY: 5120
+    1vCPU-6Gb:
+      CPU: 1024
+      MEMORY: 6144
+    1vCPU-7Gb:
+      CPU: 1024
+      MEMORY: 7168
+    1vCPU-8Gb:
+      CPU: 1024
+      MEMORY: 8192
+    2vCPU-4Gb:
+      CPU: 2048
+      MEMORY: 4096
+    2vCPU-5Gb:
+      CPU: 2048
+      MEMORY: 5120
+    2vCPU-6Gb:
+      CPU: 2048
+      MEMORY: 6144
+    2vCPU-7Gb:
+      CPU: 2048
+      MEMORY: 7168
+    2vCPU-8Gb:
+      CPU: 2048
+      MEMORY: 8192
+    2vCPU-9Gb:
+      CPU: 2048
+      MEMORY: 9216
+    2vCPU-10Gb:
+      CPU: 2048
+      MEMORY: 10240
+    2vCPU-11Gb:
+      CPU: 2048
+      MEMORY: 11264
+    2vCPU-12Gb:
+      CPU: 2048
+      MEMORY: 12288
+    2vCPU-13Gb:
+      CPU: 2048
+      MEMORY: 13312
+    2vCPU-14Gb:
+      CPU: 2048
+      MEMORY: 14336
+    2vCPU-15Gb:
+      CPU: 2048
+      MEMORY: 15360
+    2vCPU-16Gb:
+      CPU: 2048
+      MEMORY: 16384
+    4vCPU-8Gb:
+      CPU: 4096
+      MEMORY: 8192
+    4vCPU-9Gb:
+      CPU: 4096
+      MEMORY: 9216
+    4vCPU-10Gb:
+      CPU: 4096
+      MEMORY: 10240
+    4vCPU-11Gb:
+      CPU: 4096
+      MEMORY: 11264
+    4vCPU-12Gb:
+      CPU: 4096
+      MEMORY: 12288
+    4vCPU-13Gb:
+      CPU: 4096
+      MEMORY: 13312
+    4vCPU-14Gb:
+      CPU: 4096
+      MEMORY: 14336
+    4vCPU-15Gb:
+      CPU: 4096
+      MEMORY: 15360
+    4vCPU-16Gb:
+      CPU: 4096
+      MEMORY: 16384
+    4vCPU-17Gb:
+      CPU: 4096
+      MEMORY: 17408
+    4vCPU-18Gb:
+      CPU: 4096
+      MEMORY: 18432
+    4vCPU-19Gb:
+      CPU: 4096
+      MEMORY: 19456
+    4vCPU-20Gb:
+      CPU: 4096
+      MEMORY: 20480
+    4vCPU-21Gb:
+      CPU: 4096
+      MEMORY: 21504
+    4vCPU-22Gb:
+      CPU: 4096
+      MEMORY: 22528
+    4vCPU-23Gb:
+      CPU: 4096
+      MEMORY: 23552
+    4vCPU-24Gb:
+      CPU: 4096
+      MEMORY: 24576
+    4vCPU-25Gb:
+      CPU: 4096
+      MEMORY: 25600
+    4vCPU-26Gb:
+      CPU: 4096
+      MEMORY: 26624
+    4vCPU-27Gb:
+      CPU: 4096
+      MEMORY: 27648
+    4vCPU-28Gb:
+      CPU: 4096
+      MEMORY: 28672
+    4vCPU-29Gb:
+      CPU: 4096
+      MEMORY: 29696
+    4vCPU-30Gb:
+      CPU: 4096
+      MEMORY: 30720
+Parameters:
+  VPC:
+    Type: AWS::EC2::VPC::Id
+    Description: VPC to place the installation into
+  Subnets:
+    Type: AWS::EC2::Subnet::Id
+    Description: Subnet to place the installation into
+  LoadbalancerTaskSize:
+    Type: String
+    Default: .25vCPU-0.5Gb
+    AllowedValues:
+      - .25vCPU-0.5Gb
+      - .25vCPU-1Gb
+      - .25vCPU-2Gb
+      - .5vCPU-1Gb
+      - .5vCPU-2Gb
+      - .5vCPU-3Gb
+      - .5vCPU-4Gb
+      - 1vCPU-2Gb
+      - 1vCPU-3Gb
+      - 1vCPU-4Gb
+      - 1vCPU-5Gb
+      - 1vCPU-6Gb
+      - 1vCPU-7Gb
+      - 1vCPU-8Gb
+      - 2vCPU-4Gb
+      - 2vCPU-5Gb
+      - 2vCPU-6Gb
+      - 2vCPU-7Gb
+      - 2vCPU-8Gb
+      - 2vCPU-9Gb
+      - 2vCPU-10Gb
+      - 2vCPU-11Gb
+      - 2vCPU-12Gb
+      - 2vCPU-13Gb
+      - 2vCPU-14Gb
+      - 2vCPU-15Gb
+      - 2vCPU-16Gb
+      - 4vCPU-8Gb
+      - 4vCPU-9Gb
+      - 4vCPU-10Gb
+      - 4vCPU-11Gb
+      - 4vCPU-12Gb
+      - 4vCPU-13Gb
+      - 4vCPU-14Gb
+      - 4vCPU-15Gb
+      - 4vCPU-16Gb
+      - 4vCPU-17Gb
+      - 4vCPU-18Gb
+      - 4vCPU-19Gb
+      - 4vCPU-20Gb
+      - 4vCPU-21Gb
+      - 4vCPU-22Gb
+      - 4vCPU-23Gb
+      - 4vCPU-24Gb
+      - 4vCPU-25Gb
+      - 4vCPU-26Gb
+      - 4vCPU-27Gb
+      - 4vCPU-28Gb
+      - 4vCPU-29Gb
+      - 4vCPU-30Gb
+    Description: Allowed pairs of ECS task vCPU and memory
+  CollectorTaskSize:
+    Type: String
+    Default: .25vCPU-0.5Gb
+    AllowedValues:
+      - .25vCPU-0.5Gb
+      - .25vCPU-1Gb
+      - .25vCPU-2Gb
+      - .5vCPU-1Gb
+      - .5vCPU-2Gb
+      - .5vCPU-3Gb
+      - .5vCPU-4Gb
+      - 1vCPU-2Gb
+      - 1vCPU-3Gb
+      - 1vCPU-4Gb
+      - 1vCPU-5Gb
+      - 1vCPU-6Gb
+      - 1vCPU-7Gb
+      - 1vCPU-8Gb
+      - 2vCPU-4Gb
+      - 2vCPU-5Gb
+      - 2vCPU-6Gb
+      - 2vCPU-7Gb
+      - 2vCPU-8Gb
+      - 2vCPU-9Gb
+      - 2vCPU-10Gb
+      - 2vCPU-11Gb
+      - 2vCPU-12Gb
+      - 2vCPU-13Gb
+      - 2vCPU-14Gb
+      - 2vCPU-15Gb
+      - 2vCPU-16Gb
+      - 4vCPU-8Gb
+      - 4vCPU-9Gb
+      - 4vCPU-10Gb
+      - 4vCPU-11Gb
+      - 4vCPU-12Gb
+      - 4vCPU-13Gb
+      - 4vCPU-14Gb
+      - 4vCPU-15Gb
+      - 4vCPU-16Gb
+      - 4vCPU-17Gb
+      - 4vCPU-18Gb
+      - 4vCPU-19Gb
+      - 4vCPU-20Gb
+      - 4vCPU-21Gb
+      - 4vCPU-22Gb
+      - 4vCPU-23Gb
+      - 4vCPU-24Gb
+      - 4vCPU-25Gb
+      - 4vCPU-26Gb
+      - 4vCPU-27Gb
+      - 4vCPU-28Gb
+      - 4vCPU-29Gb
+      - 4vCPU-30Gb
+    Description: Allowed pairs of ECS task vCPU and memory
+  CollectorTasksDesired:
+    Type: Number
+    Default: 1
+    Description: Initial number of collector tasks
+    MaxValue: 1000
+    MinValue: 1
+  CollectorTasksMax:
+    Type: Number
+    Default: 2
+    Description: Maximum number of collector tasks. Collector service scales up when task CPU utilization reaches 80%
+    MaxValue: 1000
+    MinValue: 1
+  AcpReportFrequency:
+    Type: String
+    Default: ALL
+    AllowedValues:
+      - MONTHLY
+      - DAILY
+      - ALL
+  AcpReportOutputFormat:
+    Type: String
+    Default: CSV
+    AllowedValues:
+      - CSV
+      - PARQUET
+  ReportsExpireDays:
+    Type: Number
+    Default: 365
+    Description: Reports will be removed after specified time period.
+    MinValue: 45
+  AcpNotificationEmail:
+    Type: String
+    AllowedPattern: ^[\w!#$%&’*+/=?`{|}~^-]+(?:\.[\w!#$%&’*+/=?`{|}~^-]+)*@(?:[a-zA-Z0-9-]+\.)+[a-zA-Z]{2,6}$
+    ConstraintDescription: Requires valid email address
+    Description: Email to be used for AWS Application Cost Profiler notifications.
+  DefaultApplicationId:
+    Type: String
+    Default: ""
+    Description: Default value of Application ID to be used in the reports when the application ID attribute is not available in the trace span.
+  ApplicationIdAttr:
+    Type: String
+    Default: application_id
+    AllowedPattern: .+
+    ConstraintDescription: Application ID attribute must be specified.
+    Description: Trace span attribute containing application ID. Default Application ID will be used if this attribute is not avalable.
+  ResourceIdAttr:
+    Type: String
+    Default: resource_id
+    Description: Trace span attribute containing resource ID (ARN).
+  TenantIdAttr:
+    Type: String
+    Default: tenant_id
+    AllowedPattern: .+
+    ConstraintDescription: Tenant ID attribute must be specified.
+    Description: Trace span attribute containing tenant ID.
+Rules:
+  vpcsubnetcrossvalidation:
+    Assertions:
+      - Assert:
+          Fn::Equals:
+            - Fn::ValueOf:
+                - Subnets
+                - VpcId
+            - Ref: VPC
+        AssertDescription: Subnet must belong to the selected VPC.
+Resources:
+  costlenzdataD15A279F:
+    Type: AWS::S3::Bucket
+    Properties:
+      AccessControl: Private
+      BucketEncryption:
+        ServerSideEncryptionConfiguration:
+          - ServerSideEncryptionByDefault:
+              SSEAlgorithm: AES256
+      LifecycleConfiguration:
+        Rules:
+          - ExpirationInDays: 3
+            Id: usage_expiration
+            Prefix: usage
+            Status: Enabled
+          - ExpirationInDays: 3
+            Id: merge_expiration
+            Prefix: merged
+            Status: Enabled
+          - ExpirationInDays:
+              Ref: ReportsExpireDays
+            Id: reports_expiration
+            Prefix: reports
+            Status: Enabled
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+    UpdateReplacePolicy: Retain
+    DeletionPolicy: Retain
+    Metadata:
+      aws:cdk:path: costlenz/costlenz-data/Resource
+  costlenzdataPolicyA22C9FD0:
+    Type: AWS::S3::BucketPolicy
+    Properties:
+      Bucket:
+        Ref: costlenzdataD15A279F
+      PolicyDocument:
+        Statement:
+          - Action: s3:GetObject*
+            Condition:
+              StringEquals:
+                aws:SourceAccount:
+                  Ref: AWS::AccountId
+              ArnEquals:
+                aws:SourceArn:
+                  Fn::Join:
+                    - ""
+                    - - "arn:aws:application-cost-profiler:us-east-1:"
+                      - Ref: AWS::AccountId
+                      - :*
+            Effect: Allow
+            Principal:
+              Service: application-cost-profiler.amazonaws.com
+            Resource:
+              - Fn::GetAtt:
+                  - costlenzdataD15A279F
+                  - Arn
+              - Fn::Join:
+                  - ""
+                  - - Fn::GetAtt:
+                        - costlenzdataD15A279F
+                        - Arn
+                    - /merged/*
+          - Action: s3:PutObject*
+            Condition:
+              StringEquals:
+                aws:SourceAccount:
+                  Ref: AWS::AccountId
+              ArnEquals:
+                aws:SourceArn:
+                  Fn::Join:
+                    - ""
+                    - - "arn:aws:application-cost-profiler:us-east-1:"
+                      - Ref: AWS::AccountId
+                      - :*
+            Effect: Allow
+            Principal:
+              Service: application-cost-profiler.amazonaws.com
+            Resource:
+              - Fn::GetAtt:
+                  - costlenzdataD15A279F
+                  - Arn
+              - Fn::Join:
+                  - ""
+                  - - Fn::GetAtt:
+                        - costlenzdataD15A279F
+                        - Arn
+                    - /reports/*
+          - Action: s3:GetEncryptionConfiguration
+            Condition:
+              StringEquals:
+                aws:SourceAccount:
+                  Ref: AWS::AccountId
+              ArnEquals:
+                aws:SourceArn:
+                  Fn::Join:
+                    - ""
+                    - - "arn:aws:application-cost-profiler:us-east-1:"
+                      - Ref: AWS::AccountId
+                      - :*
+            Effect: Allow
+            Principal:
+              Service: application-cost-profiler.amazonaws.com
+            Resource:
+              - Fn::GetAtt:
+                  - costlenzdataD15A279F
+                  - Arn
+              - Fn::Join:
+                  - ""
+                  - - Fn::GetAtt:
+                        - costlenzdataD15A279F
+                        - Arn
+                    - /*
+        Version: "2012-10-17"
+    Metadata:
+      aws:cdk:path: costlenz/costlenz-data/Policy/Resource
+  reportsbucketprefixbucketprefixlambdaroleA483C4B4:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Statement:
+          - Action: sts:AssumeRole
+            Effect: Allow
+            Principal:
+              Service: lambda.amazonaws.com
+        Version: "2012-10-17"
+      ManagedPolicyArns:
+        - Fn::Join:
+            - ""
+            - - "arn:"
+              - Ref: AWS::Partition
+              - :iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+    Metadata:
+      aws:cdk:path: costlenz/reports-bucket-prefix/bucket_prefix_lambda_role/Resource
+  reportsbucketprefixbucketprefixlambdaroleDefaultPolicy7C3CA099:
+    Type: AWS::IAM::Policy
+    Properties:
+      PolicyDocument:
+        Statement:
+          - Action: s3:PutObject
+            Effect: Allow
+            Resource:
+              - Fn::GetAtt:
+                  - costlenzdataD15A279F
+                  - Arn
+              - Fn::Join:
+                  - ""
+                  - - Fn::GetAtt:
+                        - costlenzdataD15A279F
+                        - Arn
+                    - /*
+        Version: "2012-10-17"
+      PolicyName: reportsbucketprefixbucketprefixlambdaroleDefaultPolicy7C3CA099
+      Roles:
+        - Ref: reportsbucketprefixbucketprefixlambdaroleA483C4B4
+    Metadata:
+      aws:cdk:path: costlenz/reports-bucket-prefix/bucket_prefix_lambda_role/DefaultPolicy/Resource
+  reportsbucketprefixbucketprefixcrlambdaBB2608CB:
+    Type: AWS::Lambda::Function
+    Properties:
+      Code:
+        ZipFile: |
+          import boto3
+          import json
+
+          import cfnresponse
+
+          s3 = boto3.client("s3")
+
+          REQ_TYPE = "RequestType"
+
+
+          def handler(event, context):
+              print("Received event: " + json.dumps(event, indent=2))
+              response_data = {}
+              try:
+                  if event[REQ_TYPE] == "Delete":
+                      print(f"{REQ_TYPE}:", event[REQ_TYPE])
+                      print("No Physical resources to delete")
+                  elif event[REQ_TYPE] in ["Create", "Update"]:
+                      print(f"{REQ_TYPE}:", event[REQ_TYPE])
+                      bucket = event["ResourceProperties"]["bucket"]
+                      prefix = event["ResourceProperties"]["prefix"]
+                      response_data = create_prefix(bucket, prefix)
+                      print("Send response to the custom resource")
+                  response_status = cfnresponse.SUCCESS
+              except Exception as e:
+                  print("Failed to process:", e)
+                  response_status = cfnresponse.FAILED
+                  response_data = {"Failure": "Something bad happened."}
+              cfnresponse.send(event, context, response_status, response_data)
+
+
+          def create_prefix(bucket, prefix):
+              print(f"Create prefix {prefix} in bucket {bucket}...")
+              response = s3.put_object(Bucket=bucket, Key=f"{prefix}/")
+              print("Response:")
+              print(response)
+              return response
+      Role:
+        Fn::GetAtt:
+          - reportsbucketprefixbucketprefixlambdaroleA483C4B4
+          - Arn
+      FunctionName: costlenz-BucketPrefixCustomResourceLambda
+      Handler: index.handler
+      Runtime: python3.8
+      Timeout: 15
+    DependsOn:
+      - reportsbucketprefixbucketprefixlambdaroleDefaultPolicy7C3CA099
+      - reportsbucketprefixbucketprefixlambdaroleA483C4B4
+    Metadata:
+      aws:cdk:path: costlenz/reports-bucket-prefix/bucket-prefix-cr-lambda/Resource
+  reportsbucketprefixBucketPrefix3F29C270:
+    Type: AWS::CloudFormation::CustomResource
+    Properties:
+      ServiceToken:
+        Fn::GetAtt:
+          - reportsbucketprefixbucketprefixcrlambdaBB2608CB
+          - Arn
+      bucket:
+        Ref: costlenzdataD15A279F
+      prefix: reports
+    UpdateReplacePolicy: Delete
+    DeletionPolicy: Delete
+    Metadata:
+      aws:cdk:path: costlenz/reports-bucket-prefix/BucketPrefix/Default
+  vpcinfovpcinfolambdaroleFA75794F:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Statement:
+          - Action: sts:AssumeRole
+            Effect: Allow
+            Principal:
+              Service: lambda.amazonaws.com
+        Version: "2012-10-17"
+      ManagedPolicyArns:
+        - Fn::Join:
+            - ""
+            - - "arn:"
+              - Ref: AWS::Partition
+              - :iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+    Metadata:
+      aws:cdk:path: costlenz/vpc-info/vpc_info_lambda_role/Resource
+  vpcinfovpcinfolambdaroleDefaultPolicyAAD36810:
+    Type: AWS::IAM::Policy
+    Properties:
+      PolicyDocument:
+        Statement:
+          - Action: ec2:DescribeVpcs
+            Effect: Allow
+            Resource: "*"
+        Version: "2012-10-17"
+      PolicyName: vpcinfovpcinfolambdaroleDefaultPolicyAAD36810
+      Roles:
+        - Ref: vpcinfovpcinfolambdaroleFA75794F
+    Metadata:
+      aws:cdk:path: costlenz/vpc-info/vpc_info_lambda_role/DefaultPolicy/Resource
+  vpcinfovpcinfocrlambda813B1784:
+    Type: AWS::Lambda::Function
+    Properties:
+      Code:
+        ZipFile: |
+          import boto3
+          import json
+
+          import cfnresponse
+
+          ec2 = boto3.client("ec2")
+
+          REQ_TYPE = "RequestType"
+
+
+          def handler(event, context):
+              print("Received event: " + json.dumps(event, indent=2))
+              response_data = {}
+              try:
+                  if event[REQ_TYPE] == "Delete":
+                      print(f"{REQ_TYPE}:", event[REQ_TYPE])
+                      print("No Physical resources to delete")
+                  elif event[REQ_TYPE] in ["Create", "Update"]:
+                      print(f"{REQ_TYPE}:", event[REQ_TYPE])
+                      vpc_id = event["ResourceProperties"]["vpc_id"]
+                      response_data = get_vpc_info(vpc_id)
+                      print("Send response to the custom resource")
+                  response_status = cfnresponse.SUCCESS
+              except Exception as e:
+                  print("Failed to process:", e)
+                  response_status = cfnresponse.FAILED
+                  response_data = {"Failure": "Something bad happened."}
+              cfnresponse.send(event, context, response_status, response_data)
+
+
+          def get_vpc_info(vpc_id):
+              response = ec2.describe_vpcs(VpcIds=[vpc_id])
+              vpc_info = response["Vpcs"][0]
+              print("VPC Info:")
+              print(vpc_info)
+              return vpc_info
+      Role:
+        Fn::GetAtt:
+          - vpcinfovpcinfolambdaroleFA75794F
+          - Arn
+      FunctionName: costlenz-VpcInfoCustomResourceLambda
+      Handler: index.handler
+      Runtime: python3.8
+      Timeout: 15
+    DependsOn:
+      - vpcinfovpcinfolambdaroleDefaultPolicyAAD36810
+      - vpcinfovpcinfolambdaroleFA75794F
+    Metadata:
+      aws:cdk:path: costlenz/vpc-info/vpc-info-cr-lambda/Resource
+  vpcinfoVpcInfo5E99E51F:
+    Type: AWS::CloudFormation::CustomResource
+    Properties:
+      ServiceToken:
+        Fn::GetAtt:
+          - vpcinfovpcinfocrlambda813B1784
+          - Arn
+      vpc_id:
+        Ref: VPC
+    UpdateReplacePolicy: Delete
+    DeletionPolicy: Delete
+    Metadata:
+      aws:cdk:path: costlenz/vpc-info/VpcInfo/Default
+  costlenznamespace176D1D4B:
+    Type: AWS::ServiceDiscovery::PrivateDnsNamespace
+    Properties:
+      Name: costlenz.local
+      Vpc:
+        Ref: VPC
+    Metadata:
+      aws:cdk:path: costlenz/costlenz-namespace/Resource
+  ecsexecutionrole0BB0D93B:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Statement:
+          - Action: sts:AssumeRole
+            Effect: Allow
+            Principal:
+              Service: ecs-tasks.amazonaws.com
+        Version: "2012-10-17"
+      ManagedPolicyArns:
+        - Fn::Join:
+            - ""
+            - - "arn:"
+              - Ref: AWS::Partition
+              - :iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy
+    Metadata:
+      aws:cdk:path: costlenz/ecs-execution-role/Resource
+  ecsexecutionroleDefaultPolicy986C871D:
+    Type: AWS::IAM::Policy
+    Properties:
+      PolicyDocument:
+        Statement:
+          - Action:
+              - logs:CreateLogStream
+              - logs:PutLogEvents
+            Effect: Allow
+            Resource:
+              Fn::GetAtt:
+                - costlenz6EA5CF16
+                - Arn
+        Version: "2012-10-17"
+      PolicyName: ecsexecutionroleDefaultPolicy986C871D
+      Roles:
+        - Ref: ecsexecutionrole0BB0D93B
+    Metadata:
+      aws:cdk:path: costlenz/ecs-execution-role/DefaultPolicy/Resource
+  collectortaskrole8343D481:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Statement:
+          - Action: sts:AssumeRole
+            Effect: Allow
+            Principal:
+              Service: ecs-tasks.amazonaws.com
+        Version: "2012-10-17"
+    Metadata:
+      aws:cdk:path: costlenz/collector-task-role/Resource
+  collectortaskroleDefaultPolicyFE254BF6:
+    Type: AWS::IAM::Policy
+    Properties:
+      PolicyDocument:
+        Statement:
+          - Action:
+              - aws-marketplace:RegisterUsage
+              - dynamodb:DescribeTable
+              - sqs:GetQueueAttributes
+            Effect: Allow
+            Resource: "*"
+          - Action:
+              - s3:GetObject*
+              - s3:GetBucket*
+              - s3:List*
+              - s3:DeleteObject*
+              - s3:PutObject
+              - s3:PutObjectLegalHold
+              - s3:PutObjectRetention
+              - s3:PutObjectTagging
+              - s3:PutObjectVersionTagging
+              - s3:Abort*
+            Effect: Allow
+            Resource:
+              - Fn::GetAtt:
+                  - costlenzdataD15A279F
+                  - Arn
+              - Fn::Join:
+                  - ""
+                  - - Fn::GetAtt:
+                        - costlenzdataD15A279F
+                        - Arn
+                    - /*
+        Version: "2012-10-17"
+      PolicyName: collectortaskroleDefaultPolicyFE254BF6
+      Roles:
+        - Ref: collectortaskrole8343D481
+    Metadata:
+      aws:cdk:path: costlenz/collector-task-role/DefaultPolicy/Resource
+  lbtaskrole762DC449:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Statement:
+          - Action: sts:AssumeRole
+            Effect: Allow
+            Principal:
+              Service: ecs-tasks.amazonaws.com
+        Version: "2012-10-17"
+    Metadata:
+      aws:cdk:path: costlenz/lb-task-role/Resource
+  lbtaskroleDefaultPolicy031BDFCD:
+    Type: AWS::IAM::Policy
+    Properties:
+      PolicyDocument:
+        Statement:
+          - Action: aws-marketplace:RegisterUsage
+            Effect: Allow
+            Resource: "*"
+        Version: "2012-10-17"
+      PolicyName: lbtaskroleDefaultPolicy031BDFCD
+      Roles:
+        - Ref: lbtaskrole762DC449
+    Metadata:
+      aws:cdk:path: costlenz/lb-task-role/DefaultPolicy/Resource
+  mergelambdaroleA88C9D3F:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Statement:
+          - Action: sts:AssumeRole
+            Effect: Allow
+            Principal:
+              Service: lambda.amazonaws.com
+        Version: "2012-10-17"
+      ManagedPolicyArns:
+        - Fn::Join:
+            - ""
+            - - "arn:"
+              - Ref: AWS::Partition
+              - :iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+    Metadata:
+      aws:cdk:path: costlenz/merge-lambda-role/Resource
+  mergelambdaroleDefaultPolicy1373F5FF:
+    Type: AWS::IAM::Policy
+    Properties:
+      PolicyDocument:
+        Statement:
+          - Action: application-cost-profiler:ImportApplicationUsage
+            Effect: Allow
+            Resource: "*"
+          - Action:
+              - s3:GetObject*
+              - s3:GetBucket*
+              - s3:List*
+              - s3:DeleteObject*
+              - s3:PutObject
+              - s3:PutObjectLegalHold
+              - s3:PutObjectRetention
+              - s3:PutObjectTagging
+              - s3:PutObjectVersionTagging
+              - s3:Abort*
+            Effect: Allow
+            Resource:
+              - Fn::GetAtt:
+                  - costlenzdataD15A279F
+                  - Arn
+              - Fn::Join:
+                  - ""
+                  - - Fn::GetAtt:
+                        - costlenzdataD15A279F
+                        - Arn
+                    - /*
+        Version: "2012-10-17"
+      PolicyName: mergelambdaroleDefaultPolicy1373F5FF
+      Roles:
+        - Ref: mergelambdaroleA88C9D3F
+    Metadata:
+      aws:cdk:path: costlenz/merge-lambda-role/DefaultPolicy/Resource
+  acpreportdefinitionacpreportdefinitionlambdarole6421582B:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Statement:
+          - Action: sts:AssumeRole
+            Effect: Allow
+            Principal:
+              Service: lambda.amazonaws.com
+        Version: "2012-10-17"
+      ManagedPolicyArns:
+        - Fn::Join:
+            - ""
+            - - "arn:"
+              - Ref: AWS::Partition
+              - :iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+    Metadata:
+      aws:cdk:path: costlenz/acp-report-definition/acp_report_definition_lambda_role/Resource
+  acpreportdefinitionacpreportdefinitionlambdaroleDefaultPolicy7C6B9A55:
+    Type: AWS::IAM::Policy
+    Properties:
+      PolicyDocument:
+        Statement:
+          - Action:
+              - application-cost-profiler:ListReportDefinitions
+              - application-cost-profiler:DeleteReportDefinition
+              - application-cost-profiler:PutReportDefinition
+              - ce:GetCostAndUsage
+            Effect: Allow
+            Resource: "*"
+        Version: "2012-10-17"
+      PolicyName: acpreportdefinitionacpreportdefinitionlambdaroleDefaultPolicy7C6B9A55
+      Roles:
+        - Ref: acpreportdefinitionacpreportdefinitionlambdarole6421582B
+    Metadata:
+      aws:cdk:path: costlenz/acp-report-definition/acp_report_definition_lambda_role/DefaultPolicy/Resource
+  acpreportdefinitionacpreportdefinitioncrlambda212FF978:
+    Type: AWS::Lambda::Function
+    Properties:
+      Code:
+        ZipFile: |
+          import boto3
+          import botocore
+          import json
+          import cfnresponse
+
+          acp = boto3.client("applicationcostprofiler")
+          ce = boto3.client("ce")
+
+          REQ_TYPE = "RequestType"
+
+
+          def handler(event, context):
+              print("Received event: " + json.dumps(event, indent=2))
+              response_data = {}
+              try:
+                  if event[REQ_TYPE] == "Delete":
+                      print(f"{REQ_TYPE}:", event[REQ_TYPE])
+                      print("No Physical resources to delete.")
+                  elif event[REQ_TYPE] in ["Create", "Update"]:
+                      print(f"{REQ_TYPE}:", event[REQ_TYPE])
+                      props = event["ResourceProperties"]
+                      response_data = _create_report_definition(
+                          props["bucket"],
+                          props["prefix"],
+                          props["freq"],
+                          props["format"],
+                          event["StackId"],
+                      )
+                      print("Send response to the custom resource.")
+                  response_status = cfnresponse.SUCCESS
+              except Exception as e:
+                  print("Failed to process:", e)
+                  response_status = cfnresponse.FAILED
+                  response_data = {"Failure": "Something bad happened."}
+              cfnresponse.send(event, context, response_status, response_data)
+
+
+          def _check_cost_explorer_enabled():
+              try:
+                  ce.get_cost_and_usage(
+                      TimePeriod={"Start": "2021-01-01", "End": "2021-02-01"},
+                      Granularity="MONTHLY",
+                      Metrics=["UnblendedCost"],
+                  )
+
+              except botocore.exceptions.ClientError as error:
+                  err_code = error.response["Error"]["Code"]
+                  err_msg = error.response["Error"]["Message"]
+                  if (
+                      err_code == "ValidationException"
+                      and "start date is too old for daily granularity" in err_msg
+                  ):
+                      print("AWS Cost Explorer is ENABLED.")
+                  elif (
+                      err_code == "AccessDeniedException"
+                      and "User not enabled for cost explorer access" in err_msg
+                  ):
+                      print(
+                          "AWS Cost Explorer for this account is DISABLED. "
+                          "Need to enable it before using AWS Application Cost Profiler."
+                      )
+                      raise error
+                  else:
+                      raise error
+
+
+          def _create_report_definition(bucket, prefix, freq, fmt, stack_id):
+              _check_cost_explorer_enabled()
+              print(
+                  f"Create ACP report definition: bucket {bucket}, prefix {prefix}, frequency {freq}, format {fmt}"
+              )
+              report_defs_resp = acp.list_report_definitions()
+              print(f"Existing reports: {report_defs_resp}")
+              report_defs = report_defs_resp["reportDefinitions"]
+              if report_defs:
+                  print(
+                      f"There is existing ACP report definition {report_defs[0]['reportId']} and it will be replaced."
+                  )
+                  acp.delete_report_definition(reportId=report_defs[0]["reportId"])
+              resp = acp.put_report_definition(
+                  reportId="costprofiler",
+                  reportDescription=f"This definition was automatically generated by CloudFormation stack: {stack_id}.",
+                  reportFrequency=freq,
+                  format=fmt,
+                  destinationS3Location={"bucket": bucket, "prefix": prefix},
+              )
+              print(f"Created report definition: {resp}")
+              return resp
+      Role:
+        Fn::GetAtt:
+          - acpreportdefinitionacpreportdefinitionlambdarole6421582B
+          - Arn
+      FunctionName: costlenz-AcpReportDefinitionCustomResourceLambda
+      Handler: index.handler
+      Runtime: python3.8
+      Timeout: 15
+    DependsOn:
+      - acpreportdefinitionacpreportdefinitionlambdaroleDefaultPolicy7C6B9A55
+      - acpreportdefinitionacpreportdefinitionlambdarole6421582B
+    Metadata:
+      aws:cdk:path: costlenz/acp-report-definition/acp-report-definition-cr-lambda/Resource
+  acpreportdefinitionAcpReportDefinitionC49F9D26:
+    Type: AWS::CloudFormation::CustomResource
+    Properties:
+      ServiceToken:
+        Fn::GetAtt:
+          - acpreportdefinitionacpreportdefinitioncrlambda212FF978
+          - Arn
+      bucket:
+        Ref: costlenzdataD15A279F
+      prefix: reports
+      freq:
+        Ref: AcpReportFrequency
+      format:
+        Ref: AcpReportOutputFormat
+    UpdateReplacePolicy: Delete
+    DeletionPolicy: Delete
+    Metadata:
+      aws:cdk:path: costlenz/acp-report-definition/AcpReportDefinition/Default
+  snstopic2C4AE3C1:
+    Type: AWS::SNS::Topic
+    Properties:
+      TopicName: costlenz-sns
+    Metadata:
+      aws:cdk:path: costlenz/sns-topic/Resource
+  snstopicTokenSubscription1755E8461:
+    Type: AWS::SNS::Subscription
+    Properties:
+      Protocol: email
+      TopicArn:
+        Ref: snstopic2C4AE3C1
+      Endpoint:
+        Ref: AcpNotificationEmail
+    Metadata:
+      aws:cdk:path: costlenz/sns-topic/TokenSubscription:1/Resource
+  snstopicPolicy9AD78723:
+    Type: AWS::SNS::TopicPolicy
+    Properties:
+      PolicyDocument:
+        Statement:
+          - Action: sns:Publish
+            Effect: Allow
+            Principal:
+              Service: events.amazonaws.com
+            Resource:
+              Ref: snstopic2C4AE3C1
+            Sid: "0"
+        Version: "2012-10-17"
+      Topics:
+        - Ref: snstopic2C4AE3C1
+    Metadata:
+      aws:cdk:path: costlenz/sns-topic/Policy/Resource
+  notificationruleF8B81D61:
+    Type: AWS::Events::Rule
+    Properties:
+      EventPattern:
+        source:
+          - aws.application-cost-profiler
+      Name: costlenz-notifications
+      State: ENABLED
+      Targets:
+        - Arn:
+            Ref: snstopic2C4AE3C1
+          Id: Target0
+    Metadata:
+      aws:cdk:path: costlenz/notification-rule/Resource
+  costlenz6EA5CF16:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      RetentionInDays: 7
+    UpdateReplacePolicy: Retain
+    DeletionPolicy: Retain
+    Metadata:
+      aws:cdk:path: costlenz/costlenz/Resource
+  ClusterEB0386A7:
+    Type: AWS::ECS::Cluster
+    Metadata:
+      aws:cdk:path: costlenz/Cluster/Resource
+  collectorservicecollectortaskdefinition77B9991F:
+    Type: AWS::ECS::TaskDefinition
+    Properties:
+      ContainerDefinitions:
+        - Command:
+            - -c
+            - chmod 0777 /tmp && echo $DATA | base64 -d - | tee /etc/collector/collector.yaml
+          Environment:
+            - Name: DATA
+              Value:
+                Fn::Base64:
+                  Fn::Sub:
+                    - |-
+                      receivers:
+                        otlp:
+                          protocols:
+                            grpc:
+
+                      exporters:
+                        logging:
+                          loglevel: info
+                        awscostprofiler:
+                          max_records_per_batch: 20
+                          aws:
+                            bucket_name: ${BUCKET}
+                            region: ${REGION}
+                            account_id: ${ACCOUNT_ID}
+                            application_id: ${APP_ID}
+                            prefix: ${USAGE_PREFIX}
+                          attributes:
+                            tenant_id: ${TENANT_ID_ATTR}
+                            application_id: ${APP_ID_ATTR}
+                            resource_id: ${RESOURCE_ID_ATTR}
+
+                          notify_cost_profiler: false
+
+                      processors:
+                        groupbytrace:
+                          wait_duration: 9000000000
+                          span_attributes_to_propagate:
+                            - ${TENANT_ID_ATTR}
+                            - ${APP_ID_ATTR}
+
+                      service:
+                        pipelines:
+                          traces:
+                            receivers: [otlp]
+                            processors: [groupbytrace]
+                            exporters: [awscostprofiler, logging]
+                      #  telemetry:
+                      #    logs:
+                      #      level: debug
+                    - BUCKET:
+                        Ref: costlenzdataD15A279F
+                      USAGE_PREFIX: usage
+                      REGION:
+                        Ref: AWS::Region
+                      ACCOUNT_ID:
+                        Ref: AWS::AccountId
+                      APP_ID_ATTR:
+                        Ref: ApplicationIdAttr
+                      RESOURCE_ID_ATTR:
+                        Ref: ResourceIdAttr
+                      APP_ID:
+                        Ref: DefaultApplicationId
+                      TENANT_ID_ATTR:
+                        Ref: TenantIdAttr
+          Essential: false
+          Image: bash
+          LogConfiguration:
+            LogDriver: awslogs
+            Options:
+              awslogs-group:
+                Ref: costlenz6EA5CF16
+              awslogs-stream-prefix: collector-config-sidecar
+              awslogs-region:
+                Ref: AWS::Region
+          MountPoints:
+            - ContainerPath: /etc/collector
+              ReadOnly: false
+              SourceVolume: collectorconf
+            - ContainerPath: /tmp
+              ReadOnly: false
+              SourceVolume: collectortmp
+          Name: collector-config-sidecar
+        - Command:
+            - --config
+            - /etc/collector/collector.yaml
+          DependsOn:
+            - Condition: COMPLETE
+              ContainerName: collector-config-sidecar
+          Essential: true
+          Image: 709825985650.dkr.ecr.us-east-1.amazonaws.com/atlasgurus/costlenz-collector:1.0.2
+          LogConfiguration:
+            LogDriver: awslogs
+            Options:
+              awslogs-group:
+                Ref: costlenz6EA5CF16
+              awslogs-stream-prefix: collector
+              awslogs-region:
+                Ref: AWS::Region
+          MountPoints:
+            - ContainerPath: /etc/collector
+              ReadOnly: true
+              SourceVolume: collectorconf
+            - ContainerPath: /tmp
+              ReadOnly: false
+              SourceVolume: collectortmp
+          Name: collector
+          PortMappings:
+            - ContainerPort: 4317
+              Protocol: tcp
+      Cpu:
+        Fn::FindInMap:
+          - tasksizemapping
+          - Ref: CollectorTaskSize
+          - CPU
+      ExecutionRoleArn:
+        Fn::GetAtt:
+          - ecsexecutionrole0BB0D93B
+          - Arn
+      Family: costlenzcollectorservicecollectortaskdefinition49E8269B
+      Memory:
+        Fn::FindInMap:
+          - tasksizemapping
+          - Ref: CollectorTaskSize
+          - MEMORY
+      NetworkMode: awsvpc
+      RequiresCompatibilities:
+        - FARGATE
+      TaskRoleArn:
+        Fn::GetAtt:
+          - collectortaskrole8343D481
+          - Arn
+      Volumes:
+        - Host: {}
+          Name: collectorconf
+        - Host: {}
+          Name: collectortmp
+    Metadata:
+      aws:cdk:path: costlenz/collector-service/collector-task-definition/Resource
+  collectorserviceService10024C89:
+    Type: AWS::ECS::Service
+    Properties:
+      Cluster:
+        Ref: ClusterEB0386A7
+      DeploymentConfiguration:
+        DeploymentCircuitBreaker:
+          Enable: true
+          Rollback: false
+        MaximumPercent: 200
+        MinimumHealthyPercent: 50
+      DeploymentController:
+        Type: ECS
+      DesiredCount:
+        Ref: CollectorTasksDesired
+      EnableECSManagedTags: false
+      LaunchType: FARGATE
+      NetworkConfiguration:
+        AwsvpcConfiguration:
+          AssignPublicIp: ENABLED
+          SecurityGroups:
+            - Fn::GetAtt:
+                - collectorserviceSecurityGroup880155BB
+                - GroupId
+          Subnets:
+            - Ref: Subnets
+      PropagateTags: SERVICE
+      ServiceRegistries:
+        - RegistryArn:
+            Fn::GetAtt:
+              - collectorserviceCloudmapService5B583F42
+              - Arn
+      TaskDefinition:
+        Ref: collectorservicecollectortaskdefinition77B9991F
+    Metadata:
+      aws:cdk:path: costlenz/collector-service/collector-service/Service
+  collectorserviceCloudmapService5B583F42:
+    Type: AWS::ServiceDiscovery::Service
+    Properties:
+      DnsConfig:
+        DnsRecords:
+          - TTL: 60
+            Type: A
+        NamespaceId:
+          Fn::GetAtt:
+            - costlenznamespace176D1D4B
+            - Id
+        RoutingPolicy: MULTIVALUE
+      HealthCheckCustomConfig:
+        FailureThreshold: 1
+      Name: collector
+      NamespaceId:
+        Fn::GetAtt:
+          - costlenznamespace176D1D4B
+          - Id
+    Metadata:
+      aws:cdk:path: costlenz/collector-service/collector-service/CloudmapService/Resource
+  collectorserviceSecurityGroup880155BB:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: costlenz/collector-service/collector-service/SecurityGroup
+      SecurityGroupEgress:
+        - CidrIp: 0.0.0.0/0
+          Description: Allow all outbound traffic by default
+          IpProtocol: "-1"
+      SecurityGroupIngress:
+        - Description: Allow connections from loadbalancers layer
+          FromPort: 4317
+          IpProtocol: tcp
+          SourceSecurityGroupId:
+            Fn::GetAtt:
+              - loadbalancerserviceSecurityGroup1F5124C2
+              - GroupId
+          ToPort: 4317
+      VpcId:
+        Ref: VPC
+    Metadata:
+      aws:cdk:path: costlenz/collector-service/collector-service/SecurityGroup/Resource
+  collectorserviceTaskCountTarget9B03422F:
+    Type: AWS::ApplicationAutoScaling::ScalableTarget
+    Properties:
+      MaxCapacity:
+        Ref: CollectorTasksMax
+      MinCapacity:
+        Ref: CollectorTasksDesired
+      ResourceId:
+        Fn::Join:
+          - ""
+          - - service/
+            - Ref: ClusterEB0386A7
+            - /
+            - Fn::GetAtt:
+                - collectorserviceService10024C89
+                - Name
+      RoleARN:
+        Fn::Join:
+          - ""
+          - - "arn:"
+            - Ref: AWS::Partition
+            - ":iam::"
+            - Ref: AWS::AccountId
+            - :role/aws-service-role/ecs.application-autoscaling.amazonaws.com/AWSServiceRoleForApplicationAutoScaling_ECSService
+      ScalableDimension: ecs:service:DesiredCount
+      ServiceNamespace: ecs
+    Metadata:
+      aws:cdk:path: costlenz/collector-service/collector-service/TaskCount/Target/Resource
+  collectorserviceTaskCountTargetcollectorcpuscaling63534B94:
+    Type: AWS::ApplicationAutoScaling::ScalingPolicy
+    Properties:
+      PolicyName: costlenzcollectorserviceTaskCountTargetcollectorcpuscalingBD1DDE55
+      PolicyType: TargetTrackingScaling
+      ScalingTargetId:
+        Ref: collectorserviceTaskCountTarget9B03422F
+      TargetTrackingScalingPolicyConfiguration:
+        PredefinedMetricSpecification:
+          PredefinedMetricType: ECSServiceAverageCPUUtilization
+        TargetValue: 80
+    Metadata:
+      aws:cdk:path: costlenz/collector-service/collector-service/TaskCount/Target/collector-cpu-scaling/Resource
+  loadbalancerserviceloadbalancertaskdefinitionF9E015CB:
+    Type: AWS::ECS::TaskDefinition
+    Properties:
+      ContainerDefinitions:
+        - Command:
+            - -c
+            - chmod 0777 /tmp && echo $DATA | base64 -d - | tee /etc/loadbalancer/loadbalancer.yaml
+          Environment:
+            - Name: DATA
+              Value:
+                Fn::Base64:
+                  Fn::Sub:
+                    - |-
+                      receivers:
+                        otlp:
+                          protocols:
+                            grpc:
+
+                      exporters:
+                        logging:
+                          loglevel: info
+                        loadbalancing:
+                          protocol:
+                            otlp:
+                              tls:
+                                insecure: true
+                          resolver:
+                            dns:
+                              hostname: ${COLLECTOR_DNS_NAME}
+                              port: 4317
+
+                      service:
+                        pipelines:
+                          traces:
+                            receivers:
+                              - otlp
+                            processors: []
+                            exporters:
+                              - loadbalancing
+                              - logging
+                    - COLLECTOR_DNS_NAME: collector.costlenz.local
+          Essential: false
+          Image: bash
+          LogConfiguration:
+            LogDriver: awslogs
+            Options:
+              awslogs-group:
+                Ref: costlenz6EA5CF16
+              awslogs-stream-prefix: loadbalancer-config-sidecar
+              awslogs-region:
+                Ref: AWS::Region
+          MountPoints:
+            - ContainerPath: /etc/loadbalancer
+              ReadOnly: false
+              SourceVolume: loadbalancerconf
+            - ContainerPath: /tmp
+              ReadOnly: false
+              SourceVolume: loadbalancertmp
+          Name: loadbalancer-config-sidecar
+        - Command:
+            - --config
+            - /etc/loadbalancer/loadbalancer.yaml
+          DependsOn:
+            - Condition: COMPLETE
+              ContainerName: loadbalancer-config-sidecar
+          Essential: true
+          Image: 709825985650.dkr.ecr.us-east-1.amazonaws.com/atlasgurus/costlenz-collector:1.0.2
+          LogConfiguration:
+            LogDriver: awslogs
+            Options:
+              awslogs-group:
+                Ref: costlenz6EA5CF16
+              awslogs-stream-prefix: loadbalancer
+              awslogs-region:
+                Ref: AWS::Region
+          MountPoints:
+            - ContainerPath: /etc/loadbalancer
+              ReadOnly: true
+              SourceVolume: loadbalancerconf
+            - ContainerPath: /tmp
+              ReadOnly: false
+              SourceVolume: loadbalancertmp
+          Name: loadbalancer
+          PortMappings:
+            - ContainerPort: 4317
+              Protocol: tcp
+      Cpu:
+        Fn::FindInMap:
+          - tasksizemapping
+          - Ref: LoadbalancerTaskSize
+          - CPU
+      ExecutionRoleArn:
+        Fn::GetAtt:
+          - ecsexecutionrole0BB0D93B
+          - Arn
+      Family: costlenzloadbalancerserviceloadbalancertaskdefinition4D04F263
+      Memory:
+        Fn::FindInMap:
+          - tasksizemapping
+          - Ref: LoadbalancerTaskSize
+          - MEMORY
+      NetworkMode: awsvpc
+      RequiresCompatibilities:
+        - FARGATE
+      TaskRoleArn:
+        Fn::GetAtt:
+          - lbtaskrole762DC449
+          - Arn
+      Volumes:
+        - Host: {}
+          Name: loadbalancerconf
+        - Host: {}
+          Name: loadbalancertmp
+    Metadata:
+      aws:cdk:path: costlenz/loadbalancer-service/loadbalancer-task-definition/Resource
+  loadbalancerserviceService6C0A64FA:
+    Type: AWS::ECS::Service
+    Properties:
+      Cluster:
+        Ref: ClusterEB0386A7
+      DeploymentConfiguration:
+        DeploymentCircuitBreaker:
+          Enable: true
+          Rollback: false
+        MaximumPercent: 200
+        MinimumHealthyPercent: 50
+      DeploymentController:
+        Type: ECS
+      DesiredCount: 1
+      EnableECSManagedTags: false
+      LaunchType: FARGATE
+      NetworkConfiguration:
+        AwsvpcConfiguration:
+          AssignPublicIp: ENABLED
+          SecurityGroups:
+            - Fn::GetAtt:
+                - loadbalancerserviceSecurityGroup1F5124C2
+                - GroupId
+          Subnets:
+            - Ref: Subnets
+      PropagateTags: SERVICE
+      ServiceRegistries:
+        - RegistryArn:
+            Fn::GetAtt:
+              - loadbalancerserviceCloudmapService3B7D4DA7
+              - Arn
+      TaskDefinition:
+        Ref: loadbalancerserviceloadbalancertaskdefinitionF9E015CB
+    Metadata:
+      aws:cdk:path: costlenz/loadbalancer-service/loadbalancer-service/Service
+  loadbalancerserviceCloudmapService3B7D4DA7:
+    Type: AWS::ServiceDiscovery::Service
+    Properties:
+      DnsConfig:
+        DnsRecords:
+          - TTL: 60
+            Type: A
+        NamespaceId:
+          Fn::GetAtt:
+            - costlenznamespace176D1D4B
+            - Id
+        RoutingPolicy: MULTIVALUE
+      HealthCheckCustomConfig:
+        FailureThreshold: 1
+      Name: loadbalancer
+      NamespaceId:
+        Fn::GetAtt:
+          - costlenznamespace176D1D4B
+          - Id
+    Metadata:
+      aws:cdk:path: costlenz/loadbalancer-service/loadbalancer-service/CloudmapService/Resource
+  loadbalancerserviceSecurityGroup1F5124C2:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: costlenz/loadbalancer-service/loadbalancer-service/SecurityGroup
+      SecurityGroupEgress:
+        - CidrIp: 0.0.0.0/0
+          Description: Allow all outbound traffic by default
+          IpProtocol: "-1"
+      SecurityGroupIngress:
+        - CidrIp:
+            Fn::GetAtt:
+              - vpcinfoVpcInfo5E99E51F
+              - CidrBlock
+          Description: Allow connections within the VPC
+          FromPort: 4317
+          IpProtocol: tcp
+          ToPort: 4317
+      VpcId:
+        Ref: VPC
+    Metadata:
+      aws:cdk:path: costlenz/loadbalancer-service/loadbalancer-service/SecurityGroup/Resource
+  loadbalancerserviceTaskCountTarget2135E788:
+    Type: AWS::ApplicationAutoScaling::ScalableTarget
+    Properties:
+      MaxCapacity: 1
+      MinCapacity: 1
+      ResourceId:
+        Fn::Join:
+          - ""
+          - - service/
+            - Ref: ClusterEB0386A7
+            - /
+            - Fn::GetAtt:
+                - loadbalancerserviceService6C0A64FA
+                - Name
+      RoleARN:
+        Fn::Join:
+          - ""
+          - - "arn:"
+            - Ref: AWS::Partition
+            - ":iam::"
+            - Ref: AWS::AccountId
+            - :role/aws-service-role/ecs.application-autoscaling.amazonaws.com/AWSServiceRoleForApplicationAutoScaling_ECSService
+      ScalableDimension: ecs:service:DesiredCount
+      ServiceNamespace: ecs
+    Metadata:
+      aws:cdk:path: costlenz/loadbalancer-service/loadbalancer-service/TaskCount/Target/Resource
+  loadbalancerserviceTaskCountTargetloadbalancercpuscaling5C918F28:
+    Type: AWS::ApplicationAutoScaling::ScalingPolicy
+    Properties:
+      PolicyName: costlenzloadbalancerserviceTaskCountTargetloadbalancercpuscaling95443042
+      PolicyType: TargetTrackingScaling
+      ScalingTargetId:
+        Ref: loadbalancerserviceTaskCountTarget2135E788
+      TargetTrackingScalingPolicyConfiguration:
+        PredefinedMetricSpecification:
+          PredefinedMetricType: ECSServiceAverageCPUUtilization
+        TargetValue: 80
+    Metadata:
+      aws:cdk:path: costlenz/loadbalancer-service/loadbalancer-service/TaskCount/Target/loadbalancer-cpu-scaling/Resource
+  mergeusagepartslambdaA7343A62:
+    Type: AWS::Lambda::Function
+    Properties:
+      Code:
+        ZipFile: |
+          import boto3
+          import datetime
+          import time
+          import os
+
+          BUCKET = os.getenv("BUCKET")
+          INPUT_PREFIX = os.getenv("INPUT_PREFIX", "")
+          OUTPUT_PREFIX = os.getenv("OUTPUT_PREFIX", "")
+
+          s3 = boto3.resource("s3")
+          acp = boto3.client("applicationcostprofiler")
+
+          PERIOD = int(datetime.timedelta(hours=1).total_seconds() * 1_000_000)
+
+
+          def _two_periods_ago_start_timestamp():
+              return int(time.time() * 1_000_000 / PERIOD) * PERIOD - 2 * PERIOD
+
+
+          def _strip_csv_header(body: str):
+              if body.startswith("ApplicationId"):
+                  return body.split("\n", 1)[1]
+              else:
+                  return body
+
+
+          def merge_and_notify(event, context):
+              bucket = s3.Bucket(BUCKET)
+              period_timestamp = _two_periods_ago_start_timestamp()
+              prefix = f"{INPUT_PREFIX}/costprofiler_{period_timestamp}"
+              print(f"Search for usage files for period {period_timestamp} with prefix {prefix}")
+              files = list(bucket.objects.filter(Prefix=prefix).all())
+
+              print(f"Found {len(files)} files.")
+
+              if len(files) > 0:
+                  merged_filename = f"/tmp/costprofiler_{period_timestamp}.csv"
+                  s3_key = f"{OUTPUT_PREFIX}/costprofiler_{period_timestamp}.csv"
+                  with open(merged_filename, "w") as merge_file:
+                      file_num = 0
+                      for usage_file in files:
+                          print(f"Merge usage file: {usage_file} into {merged_filename}")
+                          body = usage_file.get()["Body"].read().decode("utf-8")
+                          if file_num > 0:
+                              new_body = _strip_csv_header(body)
+                              merge_file.write(new_body)
+                          else:
+                              merge_file.write(body)
+                          file_num += 1
+                  print(f"Upload {merged_filename} to {s3_key}")
+                  bucket.upload_file(merged_filename, s3_key)
+
+                  res = acp.import_application_usage(
+                      sourceS3Location={
+                          "bucket": BUCKET,
+                          "key": s3_key,
+                      }
+                  )
+                  print(f"Notified AWS Application Cost Profiler. importId {res['importId']}")
+              else:
+                  print(f"Nothing to do.")
+
+
+          if __name__ == "__main__":
+              merge_and_notify(None, None)
+      Role:
+        Fn::GetAtt:
+          - mergelambdaroleA88C9D3F
+          - Arn
+      Environment:
+        Variables:
+          BUCKET:
+            Ref: costlenzdataD15A279F
+          INPUT_PREFIX: usage
+          OUTPUT_PREFIX: merged
+      FunctionName: MergeUsagePartitionsLambda
+      Handler: index.merge_and_notify
+      Runtime: python3.8
+      Timeout: 60
+    DependsOn:
+      - mergelambdaroleDefaultPolicy1373F5FF
+      - mergelambdaroleA88C9D3F
+    Metadata:
+      aws:cdk:path: costlenz/merge-usage-parts-lambda/Resource
+  mergelambdascheduleD38F211F:
+    Type: AWS::Events::Rule
+    Properties:
+      ScheduleExpression: cron(5 * ? * * *)
+      State: ENABLED
+      Targets:
+        - Arn:
+            Fn::GetAtt:
+              - mergeusagepartslambdaA7343A62
+              - Arn
+          Id: Target0
+    Metadata:
+      aws:cdk:path: costlenz/merge-lambda-schedule/Resource
+  mergelambdascheduleAllowEventRulecostlenzmergeusagepartslambda50F22A77ED39C021:
+    Type: AWS::Lambda::Permission
+    Properties:
+      Action: lambda:InvokeFunction
+      FunctionName:
+        Fn::GetAtt:
+          - mergeusagepartslambdaA7343A62
+          - Arn
+      Principal: events.amazonaws.com
+      SourceArn:
+        Fn::GetAtt:
+          - mergelambdascheduleD38F211F
+          - Arn
+    Metadata:
+      aws:cdk:path: costlenz/merge-lambda-schedule/AllowEventRulecostlenzmergeusagepartslambda50F22A77
+Outputs:
+  otelendpoint:
+    Description: CostLenz OTEL Endpoint
+    Value: loadbalancer.costlenz.local
+  bucket:
+    Description: CostLenz data bucket to store usage data and AWS Application Cost Profiler reports
+    Value:
+      Ref: costlenzdataD15A279F
+  reportsprefix:
+    Description: Data bucket folder to store reports generated by AWS Application Cost Profiler
+    Value: reports
+
