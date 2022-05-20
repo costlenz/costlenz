@@ -43,7 +43,7 @@ The diagram shows how the CostLenz works and integrates into your own environmen
 
 ## Installation
 
-1. Get a CostLenz subscription at [AWS Marketplace](https://aws.amazon.com/marketplace/pp/prodview-fmnjbk7ili45c?sr=0-1&ref_=beagle&applicationId=AWS-Marketplace-Console). Free trial is available.
+1. Get a CostLenz subscription at [AWS Marketplace](http://aws.amazon.com/marketplace/pp/B09YHQ2D3Z). Free trial is available.
 
 2. Make sure your AWS IAM user has permissions to create resources specified in the CostLenz [template](./costlenz.yaml).
 
