@@ -941,8 +941,9 @@ Resources:
           import botocore
           import json
           import cfnresponse
+          from botocore.config import Config
 
-          acp = boto3.client("applicationcostprofiler")
+          acp = boto3.client('applicationcostprofiler', config=Config(region_name='us-east-1'))
           ce = boto3.client("ce")
 
           REQ_TYPE = "RequestType"
@@ -1207,7 +1208,7 @@ Resources:
             - Condition: COMPLETE
               ContainerName: collector-config-sidecar
           Essential: true
-          Image: 709825985650.dkr.ecr.us-east-1.amazonaws.com/atlasgurus/costlenz-collector:1.0.2
+          Image: 709825985650.dkr.ecr.us-east-1.amazonaws.com/atlasgurus/costlenz-collector:1.0.3
           LogConfiguration:
             LogDriver: awslogs
             Options:
@@ -1441,7 +1442,7 @@ Resources:
             - Condition: COMPLETE
               ContainerName: loadbalancer-config-sidecar
           Essential: true
-          Image: 709825985650.dkr.ecr.us-east-1.amazonaws.com/atlasgurus/costlenz-collector:1.0.2
+          Image: 709825985650.dkr.ecr.us-east-1.amazonaws.com/atlasgurus/costlenz-collector:1.0.3
           LogConfiguration:
             LogDriver: awslogs
             Options:
@@ -1615,13 +1616,14 @@ Resources:
           import datetime
           import time
           import os
+          from botocore.config import Config
 
           BUCKET = os.getenv("BUCKET")
           INPUT_PREFIX = os.getenv("INPUT_PREFIX", "")
           OUTPUT_PREFIX = os.getenv("OUTPUT_PREFIX", "")
 
           s3 = boto3.resource("s3")
-          acp = boto3.client("applicationcostprofiler")
+          acp = boto3.client('applicationcostprofiler', config=Config(region_name='us-east-1'))
 
           PERIOD = int(datetime.timedelta(hours=1).total_seconds() * 1_000_000)
 
